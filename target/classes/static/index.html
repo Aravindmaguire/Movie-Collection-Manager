@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--
+        META TAGS:
+        - charset="UTF-8": Supports all characters (emojis, special symbols, etc.)
+        - viewport: Makes the page responsive on mobile devices
+          width=device-width → page width matches screen width
+          initial-scale=1.0 → no zoom by default
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO: Descriptive title shown in browser tab and search results -->
+    <title>Movie Collection Manager | Your Personal Movie Dashboard</title>
+
+    <!-- SEO: Description for search engines -->
+    <meta name="description" content="Manage your personal movie collection. Add, edit, search, and organize your favorite movies with a beautiful cinematic dashboard.">
+
+    <!--
+        GOOGLE FONTS:
+        We're importing two professional fonts:
+        - 'Inter': Clean, modern font for body text (used by many top websites)
+        - 'Outfit': Stylish font for headings and the logo
+        The 'display=swap' ensures text is visible while fonts load
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Our CSS stylesheet (we'll create this in the next step) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- NAVBAR                                                        -->
+    <!-- The top bar with the project logo/title                       -->
+    <!-- ============================================================ -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-brand">
+            <!--
+                The 🎬 emoji serves as our logo — simple but effective.
+                'navbar-logo' class will have a subtle glow animation in CSS.
+            -->
+            <span class="navbar-logo">🎬</span>
+            <h1 class="navbar-title">MovieVault</h1>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT AREA                                             -->
+    <!-- Everything below the navbar lives here                        -->
+    <!-- ============================================================ -->
+    <main class="main-content" id="main-content">
+
+        <!-- ======================================================== -->
+        <!-- CONTROLS BAR                                              -->
+        <!-- Search, Filter, Sort, and Add Movie button                -->
+        <!-- ======================================================== -->
+        <section class="controls-bar" id="controls-bar">
+
+            <!-- SEARCH BAR -->
+            <!--
+                type="text": A regular text input field
+                id="search-input": Unique ID so JavaScript can find this element
+                placeholder: Gray hint text shown when the input is empty
+                The 🔍 icon is a decorative span positioned inside the input with CSS
+            -->
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    id="search-input"
+                    class="search-input"
+                    placeholder="Search movies by title..."
+                >
+            </div>
+
+            <!-- GENRE FILTER DROPDOWN -->
+            <!--
+                <select> creates a dropdown menu.
+                Each <option> is one choice in the dropdown.
+                value="" on the first option means "no filter selected" (show all)
+                JavaScript will listen for changes on this dropdown.
+            -->
+            <div class="filter-container">
+                <select id="genre-filter" class="filter-select">
+                    <option value="">All Genres</option>
+                    <option value="Action">Action</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Thriller">Thriller</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Animation">Animation</option>
+                    <option value="Documentary">Documentary</option>
+                    <option value="Fantasy">Fantasy</option>
+                </select>
+            </div>
+
+            <!-- SORT DROPDOWN -->
+            <div class="sort-container">
+                <select id="sort-select" class="filter-select">
+                    <option value="">Sort By</option>
+                    <option value="rating">Rating (High → Low)</option>
+                    <option value="year">Year (New → Old)</option>
+                </select>
+            </div>
+
+            <!-- WATCHED STATUS FILTER -->
+            <div class="watched-container">
+                <select id="watched-filter" class="filter-select">
+                    <option value="">All Movies</option>
+                    <option value="true">Watched ✅</option>
+                    <option value="false">Unwatched ⬜</option>
+                </select>
+            </div>
+
+            <!-- ADD MOVIE BUTTON -->
+            <!--
+                This button opens the "Add Movie" modal/dialog.
+                onclick will be handled by JavaScript.
+                The ＋ sign makes the button purpose immediately clear.
+            -->
+            <button class="btn btn-primary" id="add-movie-btn">
+                <span class="btn-icon">＋</span>
+                Add Movie
+            </button>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- LOADING SPINNER                                           -->
+        <!-- Shown while data is being fetched from the backend        -->
+        <!-- Hidden by default, JavaScript toggles visibility          -->
+        <!-- ======================================================== -->
+        <div class="loading-container" id="loading-container">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading movies...</p>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- EMPTY STATE                                               -->
+        <!-- Shown when there are no movies in the database            -->
+        <!-- A friendly message encouraging the user to add a movie    -->
+        <!-- Hidden by default, JavaScript toggles visibility          -->
+        <!-- ======================================================== -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">🎬</div>
+            <h2 class="empty-state-title">Your collection is empty</h2>
+            <p class="empty-state-text">Start building your movie vault by adding your first movie!</p>
+            <button class="btn btn-primary" id="empty-state-add-btn">
+                <span class="btn-icon">＋</span>
+                Add Your First Movie
+            </button>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- MOVIE CARDS GRID                                          -->
+        <!-- Movies will be dynamically inserted here by JavaScript    -->
+        <!-- Each movie becomes a card with title, rating, actions     -->
+        <!-- ======================================================== -->
+        <div class="movies-grid" id="movies-grid">
+            <!--
+                This container starts EMPTY.
+                JavaScript will dynamically create movie cards and insert them here.
+                Each card will look like this (generated by JS):
+
+                <div class="movie-card">
+                    <div class="movie-card-header">
+                        <span class="badge badge-watched">Watched ✅</span>
+                    </div>
+                    <h3 class="movie-title">Inception</h3>
+                    <p class="movie-director">Christopher Nolan</p>
+                    <div class="movie-details">
+                        <span class="movie-genre">Sci-Fi</span>
+                        <span class="movie-year">2010</span>
+                    </div>
+                    <div class="movie-rating">⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
+                    <div class="movie-actions">
+                        <button class="btn btn-edit">Edit</button>
+                        <button class="btn btn-delete">Delete</button>
+                    </div>
+                </div>
+            -->
+        </div>
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- ADD MOVIE MODAL                                               -->
+    <!-- A popup form for adding a new movie                           -->
+    <!-- Hidden by default. Appears when "Add Movie" button is clicked -->
+    <!-- ============================================================ -->
+    <!--
+        MODAL STRUCTURE:
+        - 'modal-overlay': The dark semi-transparent background
+          Clicking it closes the modal (handled by JavaScript)
+        - 'modal': The actual white/dark popup box
+        - 'modal-header': Title + close button
+        - 'modal-body': The form with input fields
+    -->
+    <div class="modal-overlay" id="add-modal-overlay">
+        <div class="modal" id="add-modal">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h2 class="modal-title">🎬 Add New Movie</h2>
+                <!--
+                    &times; is the HTML entity for ×  (multiplication sign)
+                    Used as a close button — common UI pattern
+                -->
+                <button class="modal-close" id="add-modal-close">&times;</button>
+            </div>
+
+            <!-- Modal Body: The Form -->
+            <!--
+                <form> groups input fields together.
+                id="add-movie-form": So JavaScript can listen for form submission.
+                We do NOT use the default form action/method — 
+                instead, JavaScript will handle submission via Fetch API.
+            -->
+            <form id="add-movie-form" class="movie-form">
+                <!-- Title Field -->
+                <!--
+                    <label> tells the user what this input is for.
+                    'for' attribute links the label to the input (clicking the label focuses the input).
+                    'required' means the form can't be submitted if this field is empty.
+                -->
+                <div class="form-group">
+                    <label for="add-title" class="form-label">Title *</label>
+                    <input type="text" id="add-title" class="form-input" placeholder="e.g. Inception" required>
+                </div>
+
+                <!-- Director Field -->
+                <div class="form-group">
+                    <label for="add-director" class="form-label">Director *</label>
+                    <input type="text" id="add-director" class="form-input" placeholder="e.g. Christopher Nolan" required>
+                </div>
+
+                <!-- Genre Field -->
+                <div class="form-group">
+                    <label for="add-genre" class="form-label">Genre</label>
+                    <select id="add-genre" class="form-input">
+                        <option value="">Select Genre</option>
+                        <option value="Action">Action</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Animation">Animation</option>
+                        <option value="Documentary">Documentary</option>
+                        <option value="Fantasy">Fantasy</option>
+                    </select>
+                </div>
+
+                <!-- Release Year Field -->
+                <!--
+                    type="number": Only accepts numeric input
+                    min/max: Restricts the range (1888 was the first movie ever made!)
+                    placeholder: Hint text
+                -->
+                <div class="form-group">
+                    <label for="add-year" class="form-label">Release Year</label>
+                    <input type="number" id="add-year" class="form-input" placeholder="e.g. 2010" min="1888" max="2030">
+                </div>
+
+                <!-- Rating Field -->
+                <div class="form-group">
+                    <label for="add-rating" class="form-label">Rating (1-10)</label>
+                    <input type="number" id="add-rating" class="form-input" placeholder="e.g. 8" min="1" max="10">
+                </div>
+
+                <!-- Watched Checkbox -->
+                <!--
+                    type="checkbox": A toggle (checked = true, unchecked = false)
+                    This maps to the 'watched' boolean field in our Movie entity
+                -->
+                <div class="form-group form-group-checkbox">
+                    <input type="checkbox" id="add-watched" class="form-checkbox">
+                    <label for="add-watched" class="form-label-checkbox">I've watched this movie</label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-full">
+                    🎬 Add to Collection
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- EDIT MOVIE MODAL                                              -->
+    <!-- Same structure as Add Modal, but pre-filled with movie data   -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="edit-modal-overlay">
+        <div class="modal" id="edit-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">✏️ Edit Movie</h2>
+                <button class="modal-close" id="edit-modal-close">&times;</button>
+            </div>
+
+            <form id="edit-movie-form" class="movie-form">
+                <!--
+                    HIDDEN INPUT for the movie ID.
+                    type="hidden": Not visible to the user, but JavaScript can read/set its value.
+                    We need this to know WHICH movie to update when the form is submitted.
+                -->
+                <input type="hidden" id="edit-movie-id">
+
+                <div class="form-group">
+                    <label for="edit-title" class="form-label">Title *</label>
+                    <input type="text" id="edit-title" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-director" class="form-label">Director *</label>
+                    <input type="text" id="edit-director" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-genre" class="form-label">Genre</label>
+                    <select id="edit-genre" class="form-input">
+                        <option value="">Select Genre</option>
+                        <option value="Action">Action</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Animation">Animation</option>
+                        <option value="Documentary">Documentary</option>
+                        <option value="Fantasy">Fantasy</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-year" class="form-label">Release Year</label>
+                    <input type="number" id="edit-year" class="form-input" min="1888" max="2030">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-rating" class="form-label">Rating (1-10)</label>
+                    <input type="number" id="edit-rating" class="form-input" min="1" max="10">
+                </div>
+
+                <div class="form-group form-group-checkbox">
+                    <input type="checkbox" id="edit-watched" class="form-checkbox">
+                    <label for="edit-watched" class="form-label-checkbox">I've watched this movie</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    💾 Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DELETE CONFIRMATION MODAL                                     -->
+    <!-- Asks "Are you sure?" before permanently deleting a movie      -->
+    <!-- Prevents accidental deletions                                 -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="delete-modal-overlay">
+        <div class="modal modal-small" id="delete-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🗑️ Delete Movie</h2>
+                <button class="modal-close" id="delete-modal-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Hidden input to store the ID of the movie being deleted -->
+                <input type="hidden" id="delete-movie-id">
+                <p class="delete-message">
+                    Are you sure you want to delete
+                    <!-- JavaScript will insert the movie title here -->
+                    <strong id="delete-movie-title"></strong>?
+                </p>
+                <p class="delete-warning">This action cannot be undone.</p>
+
+                <!-- Two buttons: Cancel (safe) and Delete (destructive) -->
+                <div class="delete-actions">
+                    <button class="btn btn-secondary" id="delete-cancel-btn">Cancel</button>
+                    <button class="btn btn-danger" id="delete-confirm-btn">🗑️ Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TOAST NOTIFICATION                                            -->
+    <!-- A small popup that slides in from the top-right corner        -->
+    <!-- Shows success/error messages after operations                 -->
+    <!-- Auto-disappears after a few seconds                           -->
+    <!-- ============================================================ -->
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toast-icon">✅</span>
+        <span class="toast-message" id="toast-message">Movie added successfully!</span>
+    </div>
+
+    <!-- Our JavaScript file (we'll create this in a later step) -->
+    <!--
+        'defer' attribute: The script loads in parallel with the HTML,
+        but EXECUTES only AFTER the entire HTML is fully parsed.
+        This ensures all DOM elements exist before JavaScript tries to access them.
+        Without 'defer', JavaScript might try to find elements that don't exist yet!
+    -->
+    <script src="script.js" defer></script>
+</body>
+</html>

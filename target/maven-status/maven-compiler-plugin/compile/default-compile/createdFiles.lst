@@ -1,0 +1,5 @@
+com\moviemanager\controller\MovieController.class
+com\moviemanager\repository\MovieRepository.class
+com\moviemanager\service\MovieService.class
+com\moviemanager\MovieCollectionManagerApplication.class
+com\moviemanager\entity\Movie.class

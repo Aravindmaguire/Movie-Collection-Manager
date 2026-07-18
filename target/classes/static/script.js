@@ -10,7 +10,7 @@
 // CONSTANTS & GLOBAL VARIABLES
 // ==========================================================================
 // Base URL for our Spring Boot backend API
-const API_URL = 'http://localhost:8080/api/movies';
+const API_URL = '/api/movies';
 
 // DOM Elements - We grab all the HTML elements we need to interact with
 const moviesGrid = document.getElementById('movies-grid');
